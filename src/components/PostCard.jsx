@@ -1,31 +1,36 @@
-import React from "react";
-import appwriteService from "../appwrite/Config";
-import { Link } from "react-router-dom";
+import React from 'react';
+import { Link } from 'react-router-dom';
+import appwriteService from '../appwrite/config';
 
-function PostCard({ $id, title, featuredImage }) {
+function PostCard({ $id, title, featuredImage, createdAt }) {
   return (
-    <Link
-      to={`/post/${$id}`}
-      className="block bg-white rounded-lg shadow-md overflow-hidden transform transition duration-300 hover:shadow-lg hover:-translate-y-1"
-    >
-      <div className="w-full">
-        {/* Image Wrapper */}
-        <div className="w-full h-48 overflow-hidden">
-          <img
-            className="object-cover w-full h-full transition-transform duration-300 hover:scale-105"
-            src={appwriteService.getFilePreview(featuredImage)}
-            alt={title}
-            onError={(e) => (e.target.src = "/placeholder-image.jpg")}
-          />
-        </div>
-        {/* Content */}
-        <div className="p-4">
-          <h2 className="text-xl font-semibold text-gray-800 truncate">
-            {title}
-          </h2>
-        </div>
+    <div className="bg-white shadow-md border border-gray-200 rounded-xl overflow-hidden transition-transform transform hover:scale-105 duration-300">
+      {/* Image Section */}
+      <Link to={`/post/${$id}`} className="block relative">
+        <img
+          src={appwriteService.getFilePreview(featuredImage)}
+          alt={title}
+          className="w-full h-48 object-cover rounded-t-xl"
+          onError={(e) => (e.target.src = '/fallback-image.jpg')} // Fallback image
+        />
+      </Link>
+
+      {/* Content Section */}
+      <div className="p-4">
+        <h2 className="text-lg font-semibold mb-2 truncate">{title}</h2>
+        <p className="text-sm text-gray-500">Posted on {new Date(createdAt).toLocaleDateString()}</p>
       </div>
-    </Link>
+
+      {/* Button Section */}
+      <div className="px-4 pb-4">
+        <Link
+          to={`/post/${$id}`}
+          className="inline-block bg-blue-500 text-white text-sm font-medium py-2 px-4 rounded-lg hover:bg-blue-600 transition-all"
+        >
+          Read More
+        </Link>
+      </div>
+    </div>
   );
 }
 

@@ -7,10 +7,14 @@ import authService from "../appwrite/auth";
 import { useForm } from "react-hook-form";
 
 function Login() {
-  const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm();
-  const [error, setError] = useState(null);
+  const dispatch = useDispatch();
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm();
+  const [error, setError] = useState("");
 
   const login = async (data) => {
     setError("");
@@ -18,98 +22,62 @@ function Login() {
       const session = await authService.login(data);
       if (session) {
         const userData = await authService.getCurrentUser();
-        if (userData) {
-          dispatch(authLogin({ userData }));
-          navigate("/");
-        }
+        if (userData) dispatch(authLogin(userData));
+        navigate("/");
       }
-    } catch (error) {
-      setError(error.message);
+    } catch (err) {
+      setError(err.message || "Login failed. Please try again.");
     }
   };
 
   return (
-    <div className="flex flex-col items-center justify-center h-screen bg-gray-50">
-      <div className="w-full max-w-md p-8 bg-white rounded-xl shadow-md">
-        {/* Logo */}
-        <div className="flex justify-center items-center mb-4">
-          <Logo width="100px" />
+    <div className="flex items-center justify-center min-h-screen bg-gray-50">
+      <div className="w-full max-w-md bg-white shadow-lg rounded-xl p-8 border border-gray-200">
+        <div className="mb-6 text-center">
+          <span className="inline-block w-20">
+            <Logo width="100%" />
+          </span>
+          <h2 className="text-2xl font-bold mt-2">Sign In</h2>
+          <p className="text-sm text-gray-600">
+            Don't have an account?{" "}
+            <Link to="/signup" className="text-blue-500 hover:underline">
+              Sign Up
+            </Link>
+          </p>
         </div>
 
-        <h2 className="text-xl font-bold text-gray-900 mb-6">
-          Sign In to your Account
-        </h2>
-        <p className="text-sm text-gray-600 mb-4">
-          Don't have an account yet?{" "}
-          <Link to="/signup" className="text-blue-600 hover:underline">
-            Sign Up
-          </Link>
-        </p>
-        
-        {/* Error Message */}
-        {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
-        
-        {/* Login Form */}
-        <form onSubmit={handleSubmit(login)} className="mt-6 space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Email:
-            </label>
-            <Input
-              type="email"
-              placeholder="Enter your email address"
-              {...register("email", {
-                required: "Email is required",
-                pattern: {
-                  value: /^\S+@\S+\.\S+$/i,
-                  message: "Please enter a valid email address",
-                },
-              })}
-              className="w-full border border-gray-300 rounded-lg p-3 focus:border-blue-600"
-            />
-          </div>
+        {error && <p className="text-red-600 text-center mb-4">{error}</p>}
 
-          {/* Password Input */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Password:
-            </label>
-            <input
-              type="password"
-              placeholder="Enter your password"
-              {...register("password", {
-                required: "Password is required",
-                minLength: {
-                  value: 8,
-                  message: "Password must be at least 8 characters long",
-                },
-                validate: (value) =>
-                  /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*\W).{8,}$/i.test(value) ||
-                  "Password must contain uppercase, lowercase, number, and special character",
-              })}
-              className="w-full border border-gray-300 rounded-lg p-3 focus:border-blue-600"
-            />
-        </div>
+        <form onSubmit={handleSubmit(login)} className="space-y-5">
+          <Input
+            label="Email"
+            type="email"
+            placeholder="Enter your email"
+            {...register("email", {
+              required: "Email is required",
+              pattern: {
+                value: /^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/,
+                message: "Enter a valid email address",
+              },
+            })}
+            error={errors.email?.message}
+          />
 
-        {/* Error Messages for Fields */}
-        <div className="text-red-500 text-sm">
-          {error && <p>{error}</p>}
-        </div>
+          <Input
+            label="Password"
+            type="password"
+            placeholder="Enter your password"
+            {...register("password", { required: "Password is required" })}
+            error={errors.password?.message}
+          />
 
-        {/* Sign In Button */}
-        <button
-          type="submit"
-          disabled={error}
-          className={`w-full py-3 text-white font-semibold rounded-md ${
-            error ? "bg-gray-400 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-700"
-          } focus:outline-none transition duration-300 mt-4`}
-        >
-          {error ? "Retry" : "Sign In"}
-        </button>
-      </form>
+          <Button type="submit" className="w-full">
+            Sign In
+          </Button>
+        </form>
+      </div>
     </div>
-  </div>
-);
+  );
 }
 
 export default Login;
